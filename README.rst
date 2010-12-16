@@ -7,7 +7,7 @@ Hacky Notes support
 
 Added switch -notes=FILE (-n FILE).
 If this file exists, PPC now tries to show notes for each slide.
-Format your notes files as follows:
+Format your notes files as follows::
 
     Notes for slide 1
     and some more
