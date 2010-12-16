@@ -64,6 +64,7 @@ namespace org.westhoffswelt.pdfpresenter {
             { "switch-screens", 's', 0, 0, ref Options.display_switch, "Switch the presentation and the presenter screen.", null },
             { "disable-cache", 'c', 0, 0, ref Options.disable_caching, "Disable caching and pre-rendering of slides to save memory at the cost of speed.", null },
             { "enable-compression", 'z', 0, 0, ref Options.enable_cache_compression, "Enable the compression of slide images to trade speed for memory consumption on low memory systems. (Avg. factor 1/30)", null },
+            { "notes", 'n', 0, OptionArg.STRING, ref Options.notes, "File with notes", "file" },
             { null }
         };
 

@@ -58,5 +58,7 @@ namespace org.westhoffswelt.pdfpresenter {
          * the presenter window
          */
         public static uint current_size = 60;
+
+        public static string notes = "";
     }
 }

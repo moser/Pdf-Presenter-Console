@@ -1,3 +1,24 @@
+Hacky Notes support
+===================
+
+Added switch -notes=FILE (-n FILE).
+If this file exists, PPC now tries to show notes for each slide.
+Format your notes files as follows:
+
+    Notes for slide 1
+    and some more
+    -
+    for slide 2
+    -
+    -
+    lala is really important on slide 4
+
+Why is it hacky? 
+I just added some code to window/presenter.vala to read the file and show stuff. One should refactor
+this to separate it from the view.
+
+Original Readme
+
 =====================
 Pdf Presenter Console
 =====================

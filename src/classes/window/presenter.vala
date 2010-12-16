@@ -57,6 +57,11 @@ namespace org.westhoffswelt.pdfpresenter.Window {
         protected Label slide_progress;
 
         /**
+         * Label for showing notes
+         */ 
+        protected Label notes_label;
+
+        /**
          * Fixed layout to position all the elements inside the window
          */
         protected Fixed fixedLayout = null;
@@ -68,6 +73,8 @@ namespace org.westhoffswelt.pdfpresenter.Window {
          * and stored here for performance and readability reasons.
          */
         protected uint slide_count;
+
+        protected string[] notes;
 
         /**
          * Base constructor instantiating a new presenter window
@@ -110,7 +117,7 @@ namespace org.westhoffswelt.pdfpresenter.Window {
             // Position it in the top left corner.
             // The scale rect information is used to center the image inside
             // its area.
-            this.fixedLayout.put( this.current_view, current_scale_rect.x, current_scale_rect.y );
+            this.fixedLayout.put( this.current_view, 0, 0 );
 
             // The next slide is right to the current one and takes up the
             // remaining width
@@ -129,7 +136,7 @@ namespace org.westhoffswelt.pdfpresenter.Window {
             this.fixedLayout.put( 
                 this.next_view, 
                 current_allocated_width + next_scale_rect.x,
-                next_scale_rect.y 
+                0
             );
 
             // Color needed for the labels
@@ -140,7 +147,7 @@ namespace org.westhoffswelt.pdfpresenter.Window {
             // We approximate the point size using pt = px * .75
             var font = Pango.FontDescription.from_string( "Verdana" );
             font.set_size( 
-                (int)Math.floor( bottom_height * 0.8 * 0.75 ) * Pango.SCALE
+                (int)Math.floor( bottom_height * 0.9 * 0.75 ) * Pango.SCALE
             );
 
             // The countdown timer is centered in the 90% bottom part of the screen
@@ -149,7 +156,7 @@ namespace org.westhoffswelt.pdfpresenter.Window {
             this.timer.set_justify( Justification.CENTER );
             this.timer.modify_font( font );
             this.timer.set_size_request( 
-                (int)Math.floor( this.screen_geometry.width * 0.75 ),
+                (int)Math.floor( this.screen_geometry.width * 0.4 ),
                 bottom_height - 10
             );
             this.timer.set_last_minutes( Options.last_minutes );
@@ -163,13 +170,33 @@ namespace org.westhoffswelt.pdfpresenter.Window {
             this.slide_progress.modify_fg( StateType.NORMAL, white );
             this.slide_progress.modify_font( font );
             this.slide_progress.set_size_request( 
-                (int)Math.floor( this.screen_geometry.width * 0.25 ),
+                (int)Math.floor( this.screen_geometry.width * 0.2 ),
                 bottom_height - 10 
             );
             this.fixedLayout.put(
                 this.slide_progress,
-                (int)Math.ceil( this.screen_geometry.width * 0.75 ),
+                (int)Math.ceil( this.screen_geometry.width * 0.4 ),
                 bottom_position - 10
+            );
+
+
+            var comment_font = Pango.FontDescription.from_string( "Verdana" );
+            comment_font.set_size( 
+                (int)Math.floor( (this.screen_geometry.height - next_scale_rect.height) * 0.05 ) * Pango.SCALE
+            );
+            this.notes_label = new Label( "Comment" );
+            this.notes_label.set_alignment(0.02f, 0.02f);
+            this.notes_label.set_justify( Justification.LEFT );
+            this.notes_label.modify_fg( StateType.NORMAL, white );
+            this.notes_label.modify_font( comment_font );
+            this.notes_label.set_size_request( 
+                next_allocated_width,
+                (int)this.screen_geometry.height - next_scale_rect.height
+            );
+            this.fixedLayout.put(
+                this.notes_label,
+                current_allocated_width,
+                next_scale_rect.height
             );
 
             this.add_events(EventMask.KEY_PRESS_MASK);
@@ -180,6 +207,29 @@ namespace org.westhoffswelt.pdfpresenter.Window {
 
             // Store the slide count once
             this.slide_count = this.current_view.get_renderer().get_metadata().get_slide_count();
+            this.notes = new string[slide_count];
+            var notes_file = File.new_for_path (Options.notes);
+            if(notes_file.query_exists()) {
+               try {
+                var dis = new DataInputStream (notes_file.read ());
+                string line;
+                int i = 0;
+                this.notes[0] = "";
+                while ((line = dis.read_line (null)) != null && i < this.slide_count) {
+                  if(line == "-") { //next slide
+                    i++;
+                    this.notes[i] = "";
+                  } else {
+                    this.notes[i] = this.notes[i] + line + "\n";
+                  }
+                }
+                this.notes_label.set_text(this.notes[0]);
+              } catch (Error e) {
+                  error ("%s", e.message);
+              }         
+            } else {
+              stdout.printf ("no notes found\n");
+            }
 
             this.reset();
 
@@ -224,6 +274,7 @@ namespace org.westhoffswelt.pdfpresenter.Window {
          * Update the slide count view
          */
         protected void update_slide_count() {
+            this.notes_label.set_text(this.notes[this.current_view.get_current_slide_number()]);
             this.slide_progress.set_text( 
                 "%d/%u".printf( 
                     this.current_view.get_current_slide_number() + 1, 
