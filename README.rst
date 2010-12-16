@@ -1,3 +1,7 @@
+=====================
+Pdf Presenter Console
+=====================
+
 Hacky Notes support
 ===================
 
@@ -18,10 +22,8 @@ I just added some code to window/presenter.vala to read the file and show stuff.
 this to separate it from the view.
 
 Original Readme
+===============
 
-=====================
-Pdf Presenter Console
-=====================
 
 About
 =====
